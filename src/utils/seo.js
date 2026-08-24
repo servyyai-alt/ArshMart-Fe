@@ -31,6 +31,27 @@ export const generateWebsiteSchema = () => ({
   name: runtimeConfig.appName,
   url: runtimeConfig.siteUrl,
   description: 'Premium online shopping destination in India',
+  publisher: {
+    '@type': 'Organization',
+    name: runtimeConfig.appName,
+    url: runtimeConfig.siteUrl,
+    email: runtimeConfig.supportEmail,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'No.1286, 8th Cross Street, Poompuhar Nagar, Kolathur',
+      addressLocality: 'Chennai',
+      addressRegion: 'Tamil Nadu',
+      postalCode: '600099',
+      addressCountry: 'IN',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: `+91${runtimeConfig.whatsappNumber}`,
+      contactType: 'customer support',
+      email: runtimeConfig.supportEmail,
+    },
+    sameAs: [runtimeConfig.instagramUrl].filter(Boolean),
+  },
   potentialAction: {
     '@type': 'SearchAction',
     target: `${runtimeConfig.siteUrl}/products?keyword={search_term_string}`,

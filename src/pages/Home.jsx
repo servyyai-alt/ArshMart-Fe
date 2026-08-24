@@ -40,6 +40,7 @@ import ProductCard from "../components/ProductCard.jsx";
 import { fetchFeaturedProducts } from "../redux/slices/productSlice.js";
 import { generateWebsiteSchema } from "../utils/seo.js";
 import api from "../utils/api.js";
+import { runtimeConfig } from "../utils/runtime.js";
 import bgVideo from "../assets/videos/bg-video.mp4";
 import CountUpStat from "../components/CountUpStat.jsx";
 import TestimonialsCarousel from "../components/TestimonialsCarousel.jsx";
@@ -1050,13 +1051,15 @@ export default function Home() {
                 and favorite picks from across the store.
               </p>
             </div>
-            <Link
-              to="/products"
+            <a
+              href={runtimeConfig.instagramUrl || "https://www.instagram.com/arsh_mart_"}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800 sm:mb-1"
             >
               <Instagram className="w-4 h-4" /> View on Instagram
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            </a>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[150px] sm:auto-rows-[190px] gap-3 md:gap-4">
@@ -1102,7 +1105,7 @@ export default function Home() {
           <div className="mt-6 flex items-center justify-center gap-3 text-xs text-slate-400">
             <span className="h-px w-10 bg-primary-200" />
             <Instagram className="w-4 h-4 text-primary-500" />
-            <span>@arshmart</span>
+            <span>@arsh_mart_</span>
             <span className="h-px w-10 bg-primary-200" />
           </div>
         </div>

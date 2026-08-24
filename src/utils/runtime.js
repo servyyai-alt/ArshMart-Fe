@@ -19,6 +19,8 @@ export const runtimeConfig = {
   instagramUrl: trimTrailingSlash(import.meta.env.VITE_INSTAGRAM_URL || ''),
   facebookUrl: trimTrailingSlash(import.meta.env.VITE_FACEBOOK_URL || ''),
   whatsappMessage: import.meta.env.VITE_WHATSAPP_MESSAGE || 'Thank you for choosing Arsh Mart. How can I help you?',
+  supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'arshmart2127@gmail.com',
+  businessAddress: import.meta.env.VITE_BUSINESS_ADDRESS || 'No.1286, 8th Cross Street, Poompuhar Nagar, Kolathur, Chennai - 600099',
 }
 
 export { normalizeApiBaseUrl, trimTrailingSlash }

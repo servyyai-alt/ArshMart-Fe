@@ -1,4 +1,5 @@
 import PolicyLayout from './PolicyLayout.jsx'
+import { runtimeConfig } from '../../utils/runtime.js'
 
 export default function Contact() {
   return (
@@ -10,9 +11,15 @@ export default function Contact() {
 
       <h2 className="text-black">Support</h2>
       <ul className="text-black">
-        <li><strong>Email:</strong> support@arshmart.com</li>
-        <li><strong>Phone:</strong> +91 98765 43210</li>
-        <li><strong>Address:</strong> 123, Commerce Street, Chennai, Tamil Nadu 600001</li>
+        <li><strong>Email:</strong> <a href={`mailto:${runtimeConfig.supportEmail}`} className="underline">{runtimeConfig.supportEmail}</a></li>
+        <li><strong>Phone:</strong> +91 88256 96990</li>
+        <li><strong>Address:</strong> {runtimeConfig.businessAddress}</li>
+        <li>
+          <strong>Instagram:</strong>{' '}
+          <a href={runtimeConfig.instagramUrl} target="_blank" rel="noopener noreferrer" className="underline">
+            @arsh_mart_
+          </a>
+        </li>
       </ul>
 
       <h2 className="text-black">Payments (Razorpay)</h2>

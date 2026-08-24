@@ -14,6 +14,7 @@ import {
   Truck,
 } from "lucide-react";
 import api from "../utils/api.js";
+import { runtimeConfig } from "../utils/runtime.js";
 import Logo from "./Logo.jsx";
 
 const FALLBACK_CATEGORIES = [
@@ -53,7 +54,7 @@ export default function Footer() {
     },
     {
       Icon: Instagram,
-      href: "https://instagram.com/arshmart",
+      href: runtimeConfig.instagramUrl || "https://www.instagram.com/arsh_mart_",
       label: "Instagram",
     },
     // {
@@ -172,7 +173,7 @@ export default function Footer() {
                   <MapPin className="w-4 h-4" />
                 </span>
                 <span className="text-slate-600 text-sm leading-relaxed">
-                  Arshmart Address
+                  {runtimeConfig.businessAddress}
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -190,10 +191,10 @@ export default function Footer() {
                   <Mail className="w-4 h-4" />
                 </span>
                 <a
-                  href="mailto:support@arshmart.com"
+                  href={`mailto:${runtimeConfig.supportEmail}`}
                   className="text-slate-600 hover:text-amber-700 font-medium text-sm transition-colors"
                 >
-                  support@arshmart.com
+                  {runtimeConfig.supportEmail}
                 </a>
               </li>
             </ul>
