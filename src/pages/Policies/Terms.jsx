@@ -39,10 +39,10 @@ export default function Terms() {
         Payment confirmation is subject to verification by Razorpay and your bank/payment provider.
       </p>
 
-      <h2>7. Shipping & Delivery (Shiprocket)</h2>
+      <h2>7. Shipping & Delivery</h2>
       <p>
-        Shipping is fulfilled via Shiprocket and courier partners. Delivery timelines are estimates and may vary due to
-        serviceability, weather, holidays, and operational constraints.
+        Shipping is fulfilled via courier partners. Delivery timelines are estimates and may vary due to weather,
+        holidays, and operational constraints.
       </p>
 
       <h2>8. Returns, Refunds & Cancellations</h2>
@@ -64,4 +64,3 @@ export default function Terms() {
     </PolicyLayout>
   )
 }
-

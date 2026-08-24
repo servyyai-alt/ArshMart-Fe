@@ -26,10 +26,6 @@ api.interceptors.response.use(
       ? normalizedMessage.join(', ')
       : String(normalizedMessage)
 
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-    }
-
     return Promise.reject(error)
   },
 )

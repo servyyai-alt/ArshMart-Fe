@@ -1,4 +1,3 @@
-import api from './api.js'
 import brandLogo from '../assets/Logo.png'
 import { runtimeConfig } from './runtime.js'
 
@@ -20,19 +19,51 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
   }
 
   try {
+    const token = localStorage.getItem('token')
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+
+    const requestJson = async (path, body) => {
+      const response = await fetch(`${runtimeConfig.apiBaseUrl}${path}`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(body),
+      })
+
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const message = payload?.message || payload?.detail || `Request failed with status ${response.status}`
+        throw new Error(message)
+      }
+
+      return payload
+    }
+
     let keyId = null
-    const keyRes = await api.get('/payment/key')
-    keyId = keyRes.data?.keyId || runtimeConfig.razorpayKeyId
+    const keyRes = await fetch(`${runtimeConfig.apiBaseUrl}/payment/key`, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    const keyPayload = await keyRes.json().catch(() => ({}))
+    if (!keyRes.ok) {
+      throw new Error(keyPayload?.message || `Request failed with status ${keyRes.status}`)
+    }
+    keyId = keyPayload?.keyId || runtimeConfig.razorpayKeyId
     if (!keyId) {
       onFailure?.('Payment configuration error: Razorpay key is missing')
       return
     }
 
-    const { data } = await api.post('/payment/create-order', {
-      amount,
-      orderId,
-      currency: 'INR',
-    })
+    const data = await requestJson(
+      '/payment/create-order',
+      {
+        amount,
+        orderId,
+        currency: 'INR',
+      }
+    )
 
     const options = {
       key: keyId,
@@ -45,13 +76,16 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
       handler: async (response) => {
         try {
           onProcessing?.('verifying')
-          const verifyRes = await api.post('/payment/verify', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            orderId,
-          })
-          onSuccess?.(verifyRes.data)
+          const verifyRes = await requestJson(
+            '/payment/verify',
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId,
+            }
+          )
+          onSuccess?.(verifyRes)
         } catch (err) {
           onFailure?.(err.message)
         }

@@ -29,10 +29,10 @@ export default function Privacy() {
         and is not stored on Arsh Mart servers.
       </p>
 
-      <h2 className="text-black">4. Shipping & Tracking (Shiprocket)</h2>
+      <h2 className="text-black">4. Shipping & Tracking</h2>
       <p className="text-black">
         For shipping and delivery, we may share necessary information (such as name, address, phone, and order details)
-        with Shiprocket and courier partners to fulfill your order and provide tracking updates.
+        with courier partners to fulfill your order and provide tracking updates.
       </p>
 
       <h2 className="text-black">5. Cookies</h2>

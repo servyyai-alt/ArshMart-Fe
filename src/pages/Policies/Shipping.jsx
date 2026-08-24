@@ -10,7 +10,7 @@ export default function Shipping() {
 
       <h2>1. Shipping Partner</h2>
       <p>
-        We use Shiprocket and its courier partners to ship orders. Availability depends on serviceability of your pincode.
+        We use trusted courier partners to ship orders. Availability depends on delivery coverage for your pincode.
       </p>
 
       <h2>2. Processing Time</h2>
@@ -45,4 +45,3 @@ export default function Shipping() {
     </PolicyLayout>
   )
 }
-

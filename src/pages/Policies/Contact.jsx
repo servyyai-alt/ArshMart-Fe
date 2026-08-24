@@ -27,9 +27,9 @@ export default function Contact() {
         If you see a payment error, share your order ID and payment reference (if any). Payments are processed via Razorpay.
       </p>
 
-      <h2 className="text-black">Shipping (Shiprocket)</h2>
+      <h2 className="text-black">Shipping</h2>
       <p className="text-black">
-        For delivery and tracking issues, share your order ID and tracking number (AWB) if available. Shipping is handled via Shiprocket/courier partners.
+        For delivery and tracking issues, share your order ID and tracking number if available. Shipping is handled through our courier partners.
       </p>
     </PolicyLayout>
   )

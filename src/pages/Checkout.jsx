@@ -7,7 +7,6 @@ import Button from '../components/Button.jsx'
 import { selectCartTotal, clearCart } from '../redux/slices/cartSlice.js'
 import { createOrder } from '../redux/slices/orderSlice.js'
 import { initiatePayment } from '../utils/razorpay.js'
-import { calculateOrderWeight } from '../utils/productDimensions.js'
 import toast from 'react-hot-toast'
 import api from '../utils/api.js'
 
@@ -72,13 +71,9 @@ export default function Checkout() {
     return Math.round((baseTotal * percent) / 100)
   }, [coupon?.code, coupon?.percent, baseTotal])
   const total = useMemo(() => Math.max(0, baseTotal - discount), [baseTotal, discount])
-  const shippingWeight = useMemo(() => calculateOrderWeight(items), [items])
-
   const [step, setStep] = useState('address')
   const [paymentVerifying, setPaymentVerifying] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('razorpay')
-  const [codServiceable, setCodServiceable] = useState(true)
-  const [checkingServiceability, setCheckingServiceability] = useState(false)
   const [abandonedCheckoutId, setAbandonedCheckoutId] = useState(null)
   const [address, setAddress] = useState({
     fullName: user?.name || '',
@@ -145,19 +140,7 @@ export default function Checkout() {
       return
     }
     
-    setCheckingServiceability(true)
     try {
-      const { data } = await api.post('/shipping/serviceability', {
-        pickupPincode: '',
-        deliveryPincode: address.pincode,
-        weight: shippingWeight
-      })
-      const isCodAvailable = data?.data?.data?.available_courier_companies?.some(c => c.cod === 1)
-      setCodServiceable(Boolean(isCodAvailable))
-      if (!isCodAvailable && paymentMethod === 'cod') {
-        setPaymentMethod('razorpay')
-      }
-
       // Create the pending AbandonedCheckout record
       try {
         const checkoutData = {
@@ -181,15 +164,10 @@ export default function Checkout() {
       } catch (checkoutErr) {
         console.error('Failed to create pending checkout:', checkoutErr)
       }
-
     } catch (err) {
-      setCodServiceable(false)
-      if (paymentMethod === 'cod') setPaymentMethod('razorpay')
-      toast.error(err?.message || 'Unable to verify shipping serviceability right now.')
+      toast.error(err?.message || 'Unable to continue right now.')
       setStep('address')
       return
-    } finally {
-      setCheckingServiceability(false)
     }
     setStep('payment')
   }
@@ -372,7 +350,7 @@ export default function Checkout() {
                         />
                       </div>
                     </div>
-                    <Button type="submit" loading={checkingServiceability} className="w-full text-white justify-center py-4 mt-2">
+                    <Button type="submit" className="w-full text-white justify-center py-4 mt-2">
                       Continue to Payment
                     </Button>
                   </form>
@@ -402,17 +380,16 @@ export default function Checkout() {
                       </div>
                     </div>
                     <div 
-                      className={`glass-card p-4 border transition-all ${!codServiceable ? 'opacity-50 cursor-not-allowed border-white/5' : paymentMethod === 'cod' ? 'cursor-pointer border-primary-500 bg-primary-50/10' : 'cursor-pointer border-white/10 hover:border-white/30'}`}
-                      onClick={() => codServiceable && setPaymentMethod('cod')}
+                      className={`glass-card p-4 border transition-all ${paymentMethod === 'cod' ? 'cursor-pointer border-primary-500 bg-primary-50/10' : 'cursor-pointer border-white/10 hover:border-white/30'}`}
+                      onClick={() => setPaymentMethod('cod')}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!codServiceable ? 'border-slate-300' : paymentMethod === 'cod' ? 'border-primary-500' : 'border-slate-400'}`}>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-primary-500' : 'border-slate-400'}`}>
                           {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-primary-500" />}
                         </div>
                         <div>
                           <p className="text-[#2a365b] font-medium text-sm flex items-center gap-2">
                             Cash on Delivery (COD)
-                            {!codServiceable && <span className="badge border-red-200 text-red-500 bg-red-50 text-[10px]">Not available for this pincode</span>}
                           </p>
                           <p className="text-slate-500 text-xs">Pay at your doorstep</p>
                         </div>

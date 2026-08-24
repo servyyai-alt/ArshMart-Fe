@@ -47,7 +47,6 @@ export default function Returns() {
                       </p>
                       <p className="text-slate-500 text-xs">
                         Status: {r.status}
-                        {r.shiprocket?.awb ? ` · AWB: ${r.shiprocket.awb}` : ''}
                       </p>
                     </div>
                     <div className="text-slate-400 text-xs">

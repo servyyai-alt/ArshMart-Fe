@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Save, Key, Palette, Globe, Truck, Video, Image as ImageIcon, Trash2 } from 'lucide-react'
+import { Save, Key, Palette, Globe, Video, Image as ImageIcon, Trash2 } from 'lucide-react'
 import AdminLayout from './AdminLayout.jsx'
 import Button from '../../components/Button.jsx'
 import toast from 'react-hot-toast'
@@ -32,9 +32,6 @@ export default function AdminSettings() {
     primaryColor: '#689f38',
     razorpayKeyId: '',
     razorpayKeySecret: '',
-    shiprocketEmail: '',
-    shiprocketPassword: '',
-    shiprocketPickupLocation: 'Primary',
     cloudinaryCloudName: '',
     cloudinaryApiKey: '',
     cloudinaryApiSecret: '',
@@ -63,7 +60,6 @@ export default function AdminSettings() {
   })
   const [secrets, setSecrets] = useState({
     hasRazorpayKeySecret: false,
-    hasShiprocketPassword: false,
     hasCloudinaryApiSecret: false,
   })
   const [saving, setSaving] = useState(false)
@@ -113,9 +109,6 @@ export default function AdminSettings() {
 
           razorpayKeyId: s.integrations?.razorpay?.keyId ?? prev.razorpayKeyId,
           razorpayKeySecret: '',
-          shiprocketEmail: s.integrations?.shiprocket?.email ?? prev.shiprocketEmail,
-          shiprocketPassword: '',
-          shiprocketPickupLocation: s.integrations?.shiprocket?.pickupLocation ?? prev.shiprocketPickupLocation,
           cloudinaryCloudName: s.integrations?.cloudinary?.cloudName ?? prev.cloudinaryCloudName,
           cloudinaryApiKey: s.integrations?.cloudinary?.apiKey ?? prev.cloudinaryApiKey,
           cloudinaryApiSecret: '',
@@ -123,7 +116,6 @@ export default function AdminSettings() {
 
         setSecrets({
           hasRazorpayKeySecret: Boolean(s.secrets?.hasRazorpayKeySecret),
-          hasShiprocketPassword: Boolean(s.secrets?.hasShiprocketPassword),
           hasCloudinaryApiSecret: Boolean(s.secrets?.hasCloudinaryApiSecret),
         })
       } catch (err) {
@@ -142,7 +134,6 @@ export default function AdminSettings() {
       if (s?.secrets) {
         setSecrets({
           hasRazorpayKeySecret: Boolean(s.secrets?.hasRazorpayKeySecret),
-          hasShiprocketPassword: Boolean(s.secrets?.hasShiprocketPassword),
           hasCloudinaryApiSecret: Boolean(s.secrets?.hasCloudinaryApiSecret),
         })
       }
@@ -150,7 +141,6 @@ export default function AdminSettings() {
       setSettings(prev => ({
         ...prev,
         razorpayKeySecret: '',
-        shiprocketPassword: '',
         cloudinaryApiSecret: '',
       }))
       toast.success(`${section} settings saved!`)
@@ -746,28 +736,6 @@ export default function AdminSettings() {
               {secrets.hasRazorpayKeySecret && !settings.razorpayKeySecret && (
                 <p className="text-[11px] text-slate-500 mt-1">A secret is already saved (leave blank to keep).</p>
               )}
-            </div>
-          </div>
-        </Section>
-
-        {/* Shiprocket */}
-        <Section title="Shiprocket" icon={Truck} sectionName="Shiprocket" saving={saving} onSave={handleSave}>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Email</label>
-              <input type="email" className="input-field" value={settings.shiprocketEmail} onChange={e => set('shiprocketEmail', e.target.value)} />
-            </div>
-            <div>
-              <label className="label">Password</label>
-              <input type="password" className="input-field" placeholder="••••••••" value={settings.shiprocketPassword} onChange={e => set('shiprocketPassword', e.target.value)} />
-              {secrets.hasShiprocketPassword && !settings.shiprocketPassword && (
-                <p className="text-[11px] text-slate-500 mt-1">A password is already saved (leave blank to keep).</p>
-              )}
-            </div>
-            <div className="sm:col-span-2">
-              <label className="label">Pickup Location</label>
-              <input className="input-field" placeholder="Primary" value={settings.shiprocketPickupLocation} onChange={e => set('shiprocketPickupLocation', e.target.value)} />
-              <p className="text-[11px] text-slate-500 mt-1">Must match your Shiprocket pickup location name.</p>
             </div>
           </div>
         </Section>

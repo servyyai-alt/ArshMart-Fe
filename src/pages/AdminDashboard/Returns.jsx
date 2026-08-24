@@ -100,7 +100,7 @@ export default function AdminReturns() {
                 <th className="text-left px-5 py-3.5 text-slate-400 font-medium">Order</th>
                 <th className="text-left px-5 py-3.5 text-slate-400 font-medium hidden md:table-cell">Customer</th>
                 <th className="text-left px-5 py-3.5 text-slate-400 font-medium">Status</th>
-                <th className="text-left px-5 py-3.5 text-slate-400 font-medium hidden lg:table-cell">AWB</th>
+                <th className="text-left px-5 py-3.5 text-slate-400 font-medium hidden lg:table-cell">Tracking</th>
                 <th className="text-left px-5 py-3.5 text-slate-400 font-medium">Actions</th>
               </tr>
             </thead>
@@ -153,7 +153,7 @@ export default function AdminReturns() {
                     </select>
                   </td>
                   <td className="px-5 py-3.5 hidden lg:table-cell">
-                    <span className="text-slate-400 text-xs">{r.shiprocket?.awb || '-'}</span>
+                    <span className="text-slate-400 text-xs">{r.order?.trackingNumber || '-'}</span>
                   </td>
                   <td className="px-5 py-3.5">
                     <Button
@@ -193,4 +193,3 @@ export default function AdminReturns() {
     </AdminLayout>
   )
 }
-
