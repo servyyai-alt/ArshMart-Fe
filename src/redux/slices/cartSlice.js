@@ -6,7 +6,7 @@ const LEGACY_CART_KEY = 'sandhaikart_cart'
 const getCartStateFromStorage = () => {
   try {
     const raw = localStorage.getItem(CART_KEY) || localStorage.getItem(LEGACY_CART_KEY)
-    const cart = raw ? JSON.parse(raw) : null
+    const parsed = raw ? JSON.parse(raw) : null
     if (Array.isArray(parsed)) {
       return { items: parsed, coupon: null }
     }
@@ -94,3 +94,4 @@ export const selectCartCount = (state) =>
   state.cart.items.reduce((count, item) => count + item.quantity, 0)
 
 export default cartSlice.reducer
+

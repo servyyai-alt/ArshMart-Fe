@@ -174,6 +174,12 @@ export default function Checkout() {
 
   const handlePlaceOrder = async () => {
     try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        toast.error('Please log in to place an order')
+        return
+      }
+
       const orderData = {
         orderItems: items.map(item => ({
           product: item._id || item.id || item.productId,
@@ -233,9 +239,6 @@ export default function Checkout() {
       } else {
         const message = resultAction.payload || 'Failed to place order'
         toast.error(message)
-        if (/not authenticated|token expired|invalid token/i.test(String(message))) {
-          navigate('/login?redirect=/checkout', { state: { from: { pathname: '/checkout' } } })
-        }
       }
     } catch (err) {
       toast.error(err?.message || 'Failed to place order')

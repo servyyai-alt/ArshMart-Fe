@@ -28,8 +28,12 @@ export const loadUser = createAsyncThunk('auth/loadUser', async (_, { rejectWith
     const { data } = await api.get('/auth/me')
     return data.user
   } catch (err) {
-    localStorage.removeItem('token')
-    return rejectWithValue(err.response?.data?.message || 'Session expired')
+    const status = err.response?.status
+    const message = err.response?.data?.message || 'Session expired'
+    if (status === 401 || /invalid token|token expired|session expired/i.test(String(message))) {
+      localStorage.removeItem('token')
+    }
+    return rejectWithValue(message)
   }
 })
 

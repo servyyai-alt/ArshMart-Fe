@@ -258,10 +258,10 @@ export default function OrderDetail() {
   return (
     <>
       <SEO title="Order Details – Arsh Mart" noindex />
-      <div className="customer-page min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="customer-page min-h-screen pt-24 pb-20 mt-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between gap-4 mb-8">
-            <Link to="/orders" className="btn-ghost text-slate-300 hover:text-white text-sm">
+            <Link to="/orders" className="btn-ghost text-slate-300 hover:text-black text-sm">
               <ChevronLeft className="w-4 h-4" />
               Back to Orders
             </Link>

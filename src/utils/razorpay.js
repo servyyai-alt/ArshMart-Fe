@@ -12,6 +12,12 @@ export const loadRazorpayScript = () => {
 }
 
 export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFailure, onProcessing }) => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    onFailure?.('Please log in again to continue checkout.')
+    return
+  }
+
   const loaded = await loadRazorpayScript()
   if (!loaded) {
     onFailure?.('Failed to load Razorpay SDK')
@@ -19,10 +25,9 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
   }
 
   try {
-    const token = localStorage.getItem('token')
     const authHeaders = {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
     }
 
     const requestJson = async (path, body) => {
@@ -31,6 +36,10 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
         headers: authHeaders,
         body: JSON.stringify(body),
       })
+
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
 
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) {
@@ -44,8 +53,14 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
     let keyId = null
     const keyRes = await fetch(`${runtimeConfig.apiBaseUrl}/payment/key`, {
       method: 'GET',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { Authorization: `Bearer ${token}` },
     })
+
+    if (keyRes.status === 401) {
+      onFailure?.('Session expired. Please log in again.')
+      return
+    }
+
     const keyPayload = await keyRes.json().catch(() => ({}))
     if (!keyRes.ok) {
       throw new Error(keyPayload?.message || `Request failed with status ${keyRes.status}`)
@@ -106,6 +121,6 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
     const rzp = new window.Razorpay(options)
     rzp.open()
   } catch (err) {
-    onFailure?.(err.response?.data?.message || 'Payment initiation failed')
+    onFailure?.(err?.message || 'Payment initiation failed')
   }
 }
