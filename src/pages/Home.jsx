@@ -124,7 +124,23 @@ const HARDCODED_DEAL = {
   ],
 };
 
-const LATEST_ARRIVALS = [
+const parseMoney = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const normalizeHomepageCards = (cards = []) =>
+  (Array.isArray(cards) ? cards : [])
+    .map((card) => ({
+      kind: card?.kind === "video" ? "video" : "image",
+      url: card?.url || "",
+      title: card?.title || "",
+      publicId: card?.publicId || "",
+    }))
+    .filter((card) => Boolean(card.url));
+
+const DEFAULT_LATEST_ARRIVALS = [
   {
     title: "WELLNESS",
     description:
@@ -314,7 +330,7 @@ function DealOfDay({ offer, product }) {
   const pad = (n) => String(n).padStart(2, "0");
 
   const imageUrl = offer?.image?.url || offer?.imageUrl || product?.images?.[0]?.url || FALLBACK_HERO;
-  const discount = !offer && product?.originalPrice
+  const discount = product?.originalPrice && product?.price && product.originalPrice > product.price
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100,
       )
@@ -534,6 +550,19 @@ export default function Home() {
     shippingCharge: 40,
     freeShippingEnabled: true,
   });
+  const [latestArrivalsSettings, setLatestArrivalsSettings] = useState({
+    title: "Latest Arrivals",
+    description: "Explore our newest collection",
+    banners: DEFAULT_LATEST_ARRIVALS,
+  });
+  const [galleryTiles, setGalleryTiles] = useState(
+    galleryFallback.map((url, index) => ({
+      url,
+      title: galleryLabels[index % galleryLabels.length],
+      publicId: "",
+    })),
+  );
+  const [homepageHeroCards, setHomepageHeroCards] = useState([]);
   const [homepageOffer, setHomepageOffer] = useState({
     badge: "Deal of the day",
     title: "Up to 50% off",
@@ -543,6 +572,8 @@ export default function Home() {
     ctaLabel: "Grab the deal",
     ctaLink: "/products?sort=discount",
     image: { url: "" },
+    price: null,
+    originalPrice: null,
   });
   const [heroVideoError, setHeroVideoError] = useState(false);
   const videoRef = useRef(null);
@@ -597,9 +628,13 @@ export default function Home() {
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts());
-    api
-      .get("/settings")
-      .then((res) => {
+
+    let mounted = true;
+    const loadSettings = async () => {
+      try {
+        const res = await api.get("/settings");
+        if (!mounted) return;
+
         const g = res.data.settings?.general;
         if (g) {
           setStoreSettings((prev) => ({
@@ -616,7 +651,60 @@ export default function Home() {
                 : prev.freeShippingEnabled,
           }));
         }
-        const offer = res.data.settings?.homepage?.offerBanner;
+
+        const homepage = res.data.settings?.homepage;
+        const offer = homepage?.offerBanner;
+        const arrivals = homepage?.latestArrivals;
+        const heroCards = normalizeHomepageCards(homepage?.heroCards);
+        const banners = Array.isArray(homepage?.latestArrivalBanners) && homepage.latestArrivalBanners.length
+          ? homepage.latestArrivalBanners
+          : DEFAULT_LATEST_ARRIVALS;
+
+        setHomepageHeroCards(heroCards);
+
+        try {
+          const galleryRes = await api.get('/gallery?limit=8');
+          const images = Array.isArray(galleryRes.data?.images) ? galleryRes.data.images : [];
+          const nextTiles = galleryFallback.map((url, index) => ({
+            url,
+            title: galleryLabels[index % galleryLabels.length],
+            publicId: "",
+          }));
+
+          images.slice(0, 8).forEach((image, index) => {
+            if (!image?.url) return;
+            nextTiles[index] = {
+              url: image.url,
+              title: image.caption || galleryLabels[index % galleryLabels.length],
+              publicId: image.public_id || "",
+            };
+          });
+
+          setGalleryTiles(nextTiles);
+        } catch {
+          setGalleryTiles(
+            galleryFallback.map((url, index) => ({
+              url,
+              title: galleryLabels[index % galleryLabels.length],
+              publicId: "",
+            })),
+          );
+        }
+
+        if (arrivals) {
+          setLatestArrivalsSettings({
+            title: arrivals.title || "Latest Arrivals",
+            description: arrivals.description || "Explore our newest collection",
+            banners,
+          });
+        } else {
+          setLatestArrivalsSettings({
+            title: "Latest Arrivals",
+            description: "Explore our newest collection",
+            banners,
+          });
+        }
+
         if (offer) {
           setHomepageOffer({
             badge: offer.badge || "Deal of the day",
@@ -630,17 +718,45 @@ export default function Home() {
             image: {
               url: offer.image?.url || offer.imageUrl || "",
             },
+            price: parseMoney(offer.price),
+            originalPrice: parseMoney(offer.originalPrice),
           });
         }
-      })
-      .catch(() => {});
+      } catch {
+        // Leave defaults in place when settings are unavailable.
+      }
+    };
+
+    loadSettings();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadSettings();
+      }
+    };
+
+    window.addEventListener("focus", loadSettings);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("focus", loadSettings);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [dispatch]);
+
+  const heroVideoUrl = useMemo(() => {
+    const videoCard = homepageHeroCards.find((card) => card.kind === "video" && card.url);
+    return videoCard?.url || bgVideo;
+  }, [homepageHeroCards]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
     v.playsInline = true;
+    setHeroVideoError(false);
+    v.load();
     const tryPlay = async () => {
       try {
         await v.play();
@@ -650,7 +766,7 @@ export default function Home() {
     };
     const t = setTimeout(tryPlay, 0);
     return () => clearTimeout(t);
-  }, []);
+  }, [heroVideoUrl]);
 
   useEffect(() => {
     const items = document.querySelectorAll("[data-reveal]");
@@ -705,6 +821,15 @@ export default function Home() {
     { icon: Zap, label: "Net Banking" },
     { icon: Banknote, label: "COD" },
   ];
+
+  const dealProduct = useMemo(
+    () => ({
+      ...HARDCODED_DEAL,
+      price: parseMoney(homepageOffer.price) ?? HARDCODED_DEAL.price,
+      originalPrice: parseMoney(homepageOffer.originalPrice) ?? HARDCODED_DEAL.originalPrice,
+    }),
+    [homepageOffer.price, homepageOffer.originalPrice],
+  );
 
   return (
     <div className="bg-white">
@@ -795,7 +920,7 @@ export default function Home() {
                 {heroMedia ? (
                   <video
                     ref={videoRef}
-                    src={bgVideo}
+                    src={heroVideoUrl}
                     className="w-full h-full object-cover"
                     muted
                     playsInline
@@ -889,7 +1014,7 @@ export default function Home() {
 
       {/* ============ DEAL OF THE DAY ============ */}
       <div data-reveal>
-        <DealOfDay offer={homepageOffer} product={HARDCODED_DEAL} />
+        <DealOfDay offer={homepageOffer} product={dealProduct} />
       </div>
 
       {/* ============ TRUST FEATURES ============ */}
@@ -928,18 +1053,18 @@ export default function Home() {
         >
           <SectionHeading
             eyebrow="Fresh drops"
-            title="Latest Arrivals"
-            subtitle="Explore our newest collection"
+            title={latestArrivalsSettings.title}
+            subtitle={latestArrivalsSettings.description}
             to="/products"
           />
           <div className="grid md:grid-cols-2 gap-5">
-            {LATEST_ARRIVALS.map((b, idx) => (
+            {latestArrivalsSettings.banners.map((b, idx) => (
               <PromoBanner
-                key={b.imageUrl}
-                title={b.title}
-                tagline={b.description}
-                to={b.to}
-                imageUrl={b.imageUrl}
+                key={b.image?.publicId || b.image?.url || b.imageUrl || idx}
+                title={b.title || "Latest Arrival"}
+                tagline={b.description || ""}
+                to={b.to || "/products"}
+                imageUrl={b.image?.url || b.imageUrl || FALLBACK_HERO}
                 tone={idx}
               />
             ))}
@@ -1063,9 +1188,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[150px] sm:auto-rows-[190px] gap-3 md:gap-4">
-            {galleryFallback.slice(0, 8).map((img, i) => (
+            {galleryTiles.slice(0, 8).map((img, i) => (
               <Link
-                key={i}
+                key={img.publicId || img.url || i}
                 to="/products"
                 className={`group relative overflow-hidden rounded-2xl ring-1 ring-slate-900/5 shadow-sm ${
                   i === 0
@@ -1078,8 +1203,8 @@ export default function Home() {
                 } ${i === 7 ? "md:hidden" : ""}`}
               >
                 <img
-                  src={img}
-                  alt={galleryLabels[i % galleryLabels.length]}
+                  src={img.url}
+                  alt={img.title || galleryLabels[i % galleryLabels.length]}
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -1094,7 +1219,7 @@ export default function Home() {
                 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white ring-1 ring-white/30 backdrop-blur">
                     <Heart className="w-3 h-3 text-primary-300" />
-                    {galleryLabels[i % galleryLabels.length]}
+                    {img.title || galleryLabels[i % galleryLabels.length]}
                   </span>
                 </div>
               </Link>

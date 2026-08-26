@@ -53,6 +53,8 @@ export default function AdminSettings() {
     offerBannerTitle: 'Up to 50% off',
     offerBannerSubtitle: 'today only',
     offerBannerDescription: 'Handpicked favourites at unbeatable prices. Grab yours before the deal ends.',
+    offerBannerPrice: '',
+    offerBannerOriginalPrice: '',
     offerBannerCtaLabel: 'Grab the deal',
     offerBannerCtaLink: '/products?sort=discount',
     offerBannerImageUrl: '',
@@ -102,6 +104,8 @@ export default function AdminSettings() {
           offerBannerTitle: s.homepage?.offerBanner?.title ?? prev.offerBannerTitle,
           offerBannerSubtitle: s.homepage?.offerBanner?.subtitle ?? prev.offerBannerSubtitle,
           offerBannerDescription: s.homepage?.offerBanner?.description ?? prev.offerBannerDescription,
+          offerBannerPrice: s.homepage?.offerBanner?.price ?? '',
+          offerBannerOriginalPrice: s.homepage?.offerBanner?.originalPrice ?? '',
           offerBannerCtaLabel: s.homepage?.offerBanner?.ctaLabel ?? prev.offerBannerCtaLabel,
           offerBannerCtaLink: s.homepage?.offerBanner?.ctaLink ?? prev.offerBannerCtaLink,
           offerBannerImageUrl: s.homepage?.offerBanner?.image?.url ?? prev.offerBannerImageUrl,
@@ -165,6 +169,8 @@ export default function AdminSettings() {
         title: next.offerBannerTitle,
         subtitle: next.offerBannerSubtitle,
         description: next.offerBannerDescription,
+        price: next.offerBannerPrice,
+        originalPrice: next.offerBannerOriginalPrice,
         ctaLabel: next.offerBannerCtaLabel,
         ctaLink: next.offerBannerCtaLink,
         image: {
@@ -234,9 +240,13 @@ export default function AdminSettings() {
     try {
       const res = kind === 'video' ? await uploadVideo(file, 'hero-cards') : await uploadImage(file, 'hero-cards')
       const title = prompt('Card title (optional):', '') || ''
+      const nextCards =
+        kind === 'video'
+          ? [{ kind, url: res.url, publicId: res.public_id, title }, ...(settings.heroCards || []).filter(c => c.kind !== 'video')]
+          : [{ kind, url: res.url, publicId: res.public_id, title }, ...(settings.heroCards || []).filter(c => c.kind !== 'image')]
       const next = {
         ...settings,
-        heroCards: [...(settings.heroCards || []), { kind, url: res.url, publicId: res.public_id, title }],
+        heroCards: nextCards,
       }
       setSettings(next)
       await saveHeroFields(next)
@@ -532,6 +542,14 @@ export default function AdminSettings() {
                 <textarea className="input-field text-white resize-none h-24" value={settings.offerBannerDescription} onChange={e => set('offerBannerDescription', e.target.value)} placeholder="Handpicked favourites at unbeatable prices." />
               </div>
               <div>
+                <label className="label">Deal Price (₹)</label>
+                <input type="number" min="0" className="input-field text-white" value={settings.offerBannerPrice} onChange={e => set('offerBannerPrice', e.target.value)} placeholder="2999" />
+              </div>
+              <div>
+                <label className="label">Original Price (₹)</label>
+                <input type="number" min="0" className="input-field text-white" value={settings.offerBannerOriginalPrice} onChange={e => set('offerBannerOriginalPrice', e.target.value)} placeholder="5999" />
+              </div>
+              <div>
                 <label className="label">CTA Label</label>
                 <input className="input-field text-white" value={settings.offerBannerCtaLabel} onChange={e => set('offerBannerCtaLabel', e.target.value)} placeholder="Grab the deal" />
               </div>
@@ -658,7 +676,7 @@ export default function AdminSettings() {
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-slate-200 text-sm font-medium">Carousel cards (max 14)</p>
-                <p className="text-[11px] text-slate-500 mt-1">Shown on the homepage as a 3-card carousel under the hero.</p>
+                <p className="text-[11px] text-slate-500 mt-1">The latest image replaces the first gallery tile in #ArshMart Moments. The uploaded video becomes the homepage hero video.</p>
               </div>
               <div className="flex gap-2">
                 <label className={`btn-secondary cursor-pointer ${saving || (settings.heroCards || []).length >= 14 ? 'opacity-50 pointer-events-none' : ''}`}>
