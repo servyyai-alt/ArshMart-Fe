@@ -37,11 +37,16 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
         body: JSON.stringify(body),
       })
 
+      const payload = await response.json().catch(() => ({}))
+
       if (response.status === 401) {
-        throw new Error('Session expired. Please log in again.')
+        const message = payload?.message || payload?.detail || ''
+        if (/invalid token|token expired|not authenticated|please log in/i.test(String(message))) {
+          throw new Error('Session expired. Please log in again.')
+        }
+        throw new Error(message || 'Session expired. Please log in again.')
       }
 
-      const payload = await response.json().catch(() => ({}))
       if (!response.ok) {
         const message = payload?.message || payload?.detail || `Request failed with status ${response.status}`
         throw new Error(message)
@@ -56,15 +61,18 @@ export const initiatePayment = async ({ amount, orderId, user, onSuccess, onFail
       headers: { Authorization: `Bearer ${token}` },
     })
 
-    if (keyRes.status === 401) {
-      onFailure?.('Session expired. Please log in again.')
-      return
-    }
-
     const keyPayload = await keyRes.json().catch(() => ({}))
     if (!keyRes.ok) {
-      throw new Error(keyPayload?.message || `Request failed with status ${keyRes.status}`)
+      if (keyRes.status === 401) {
+        const message = keyPayload?.message || ''
+        if (/invalid token|token expired|not authenticated|please log in/i.test(String(message))) {
+          onFailure?.('Session expired. Please log in again.')
+          return
+        }
+      }
+      console.warn('Could not fetch Razorpay key from backend:', keyPayload?.message || keyRes.status)
     }
+
     keyId = keyPayload?.keyId || runtimeConfig.razorpayKeyId
     if (!keyId) {
       onFailure?.('Payment configuration error: Razorpay key is missing')
