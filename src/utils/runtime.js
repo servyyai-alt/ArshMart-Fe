@@ -1,3 +1,5 @@
+import { SEO_SITE_URL } from './seoDomain.js'
+
 const trimTrailingSlash = (value = '') => String(value || '').trim().replace(/\/+$/, '')
 
 const normalizeApiBaseUrl = (value = '') => {
@@ -6,7 +8,7 @@ const normalizeApiBaseUrl = (value = '') => {
   return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
 }
 
-const siteUrl = trimTrailingSlash(import.meta.env.VITE_SITE_URL || import.meta.env.VITE_APP_URL) || 'https://arshmart.com'
+const siteUrl = SEO_SITE_URL
 
 export const runtimeConfig = {
   appName: import.meta.env.VITE_APP_NAME || 'Arsh Mart',

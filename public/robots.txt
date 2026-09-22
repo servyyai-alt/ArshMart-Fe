@@ -10,4 +10,4 @@ Disallow: /returns
 Disallow: /wishlist
 Disallow: /cart
 
-Sitemap: https://arshmart.com/sitemap.xml
+Sitemap: https://www.arshmart.in/sitemap.xml

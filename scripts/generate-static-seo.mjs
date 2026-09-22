@@ -1,9 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { loadEnv } from 'vite'
+import { SEO_SITE_URL } from '../src/utils/seoDomain.js'
 
 const env = { ...loadEnv('production', process.cwd(), ''), ...process.env }
-const siteUrl = String(env.VITE_SITE_URL || env.VITE_APP_URL || 'https://arshmart.com').trim().replace(/\/+$/, '')
+const siteUrl = SEO_SITE_URL
 const apiUrl = String(env.SEO_API_URL || env.VITE_API_URL || '').trim().replace(/\/+$/, '')
 const appName = env.VITE_APP_NAME || 'Arsh Mart'
 const dist = resolve('dist')
