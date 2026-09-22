@@ -77,7 +77,7 @@ function renderPage({ path, title, description, heading, image, schema, body = '
   const html = template
     .replace(/^[ \t]*<title>[^<]*<\/title>\r?\n/m, '')
     .replace('</head>', `    ${meta}\n  </head>`)
-    .replace('<div id="root"></div>', `<div id="root"><main><h1>${escapeXml(heading)}</h1><p>${escapeXml(description)}</p>${body}</main></div>`)
+    .replace('<div id="root"></div>', `<div id="root"><main style="display:none" aria-hidden="true"><h1>${escapeXml(heading)}</h1><p>${escapeXml(description)}</p>${body}</main></div>`)
   const destination = path === '/' ? resolve(dist, 'index.html') : resolve(dist, path.slice(1), 'index.html')
   mkdirSync(dirname(destination), { recursive: true })
   writeFileSync(destination, html, 'utf8')
