@@ -6,5 +6,8 @@ Disallow: /admin/*
 Disallow: /checkout
 Disallow: /profile
 Disallow: /orders
+Disallow: /returns
+Disallow: /wishlist
+Disallow: /cart
 
 Sitemap: https://arshmart.com/sitemap.xml

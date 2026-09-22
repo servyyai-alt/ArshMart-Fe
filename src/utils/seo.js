@@ -4,21 +4,22 @@ export const generateProductSchema = (product) => ({
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: product.name,
-  image: product.images?.[0]?.url,
+  image: product.images?.map((image) => image.url).filter(Boolean),
   description: product.description,
-  sku: product._id,
+  sku: product.sku || product._id,
   brand: { '@type': 'Brand', name: product.brand || 'Arsh Mart' },
   offers: {
     '@type': 'Offer',
     url: `${runtimeConfig.siteUrl}/products/${product._id}`,
     priceCurrency: 'INR',
     price: product.price,
+    itemCondition: 'https://schema.org/NewCondition',
     availability: product.stock > 0
       ? 'https://schema.org/InStock'
       : 'https://schema.org/OutOfStock',
     seller: { '@type': 'Organization', name: 'Arsh Mart' },
   },
-  aggregateRating: product.ratings > 0 ? {
+  aggregateRating: product.numReviews > 0 && product.ratings > 0 ? {
     '@type': 'AggregateRating',
     ratingValue: product.ratings,
     reviewCount: product.numReviews,
@@ -51,11 +52,6 @@ export const generateWebsiteSchema = () => ({
       email: runtimeConfig.supportEmail,
     },
     sameAs: [runtimeConfig.instagramUrl].filter(Boolean),
-  },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: `${runtimeConfig.siteUrl}/products?keyword={search_term_string}`,
-    'query-input': 'required name=search_term_string',
   },
 })
 

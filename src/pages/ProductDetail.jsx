@@ -7,7 +7,7 @@ import Button from '../components/Button.jsx'
 import { fetchProduct, clearProduct } from '../redux/slices/productSlice.js'
 import { addToCart } from '../redux/slices/cartSlice.js'
 import { loadUser } from '../redux/slices/authSlice.js'
-import { generateProductSchema } from '../utils/seo.js'
+import { generateBreadcrumbSchema, generateProductSchema } from '../utils/seo.js'
 import { getTransformedUrl } from '../utils/cloudinary.js'
 import { formatEditableNumber, normalizeProductDimensions } from '../utils/productDimensions.js'
 import toast from 'react-hot-toast'
@@ -163,7 +163,15 @@ export default function ProductDetail() {
       <SEO
         title={product.name}
         description={product.description?.substring(0, 160)}
-        schema={generateProductSchema(product)}
+        canonicalPath={`/products/${product._id}`}
+        ogImage={product.images?.[0]?.url}
+        type="product"
+        schema={[generateProductSchema(product), generateBreadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Products', path: '/products' },
+          { name: product.category, path: `/products?category=${encodeURIComponent(product.category)}` },
+          { name: product.name, path: `/products/${product._id}` },
+        ])]}
       />
 
       <div className="customer-page min-h-screen mt-7 pt-24 pb-20 px-4 sm:px-6 lg:px-8">

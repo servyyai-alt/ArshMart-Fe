@@ -4,9 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "node scripts/generate-static-seo.mjs",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-static-seo.mjs",
     "preview": "vite preview",
     "lint": "eslint src --ext js,jsx"
   },

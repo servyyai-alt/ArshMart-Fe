@@ -77,6 +77,8 @@ export default function ProductList() {
       <SEO
         title={`${category || 'All Products'} – Arsh Mart`}
         description={`Browse ${category || 'all products'} at Arsh Mart. Quality products with fast delivery across India.`}
+        canonicalPath={category ? `/products?category=${encodeURIComponent(category)}` : '/products'}
+        noindex={Boolean(keyword || page > 1 || [...searchParams.keys()].some((key) => !['category', 'page'].includes(key)))}
       />
 
       <div className="customer-page min-h-screen pt-24 pb-20 mt-7 px-4 sm:px-6 lg:px-8">

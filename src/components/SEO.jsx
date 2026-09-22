@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async'
+import { useLocation } from 'react-router-dom'
 import { runtimeConfig } from '../utils/runtime.js'
 
 export default function SEO({
@@ -8,31 +9,39 @@ export default function SEO({
   ogImage = runtimeConfig.ogImageUrl,
   schema,
   noindex = false,
+  canonicalPath,
+  type = 'website',
 }) {
-  const fullTitle = title.includes('Arsh Mart') ? title : `${title} | Arsh Mart`
+  const { pathname, search } = useLocation()
+  const fullTitle = title.includes(runtimeConfig.appName) ? title : `${title} | ${runtimeConfig.appName}`
+  const canonicalUrl = new URL(canonicalPath || `${pathname}${search}`, `${runtimeConfig.siteUrl}/`).href
+  const imageUrl = new URL(ogImage, `${runtimeConfig.siteUrl}/`).href
+  const structuredData = schema ? JSON.stringify(schema).replace(/</g, '\\u003c') : null
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
+      <link rel="canonical" href={canonicalUrl} />
 
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-      <meta property="og:type" content="website" />
+      <meta property="og:image" content={imageUrl} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:type" content={type} />
       <meta property="og:site_name" content={runtimeConfig.appName} />
+      <meta property="og:locale" content="en_IN" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image" content={imageUrl} />
 
       {schema && (
         <script type="application/ld+json">
-          {JSON.stringify(schema)}
+          {structuredData}
         </script>
       )}
     </Helmet>
